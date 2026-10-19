@@ -4,7 +4,7 @@ from pathlib import Path
 from opslens.config import ROOT
 from opslens.collector import docker
 GiB=1024**3
-SCOPES={'Platform':(18180,18183),'Fault':(18180,18182,18183),'All':(18180,18181,18182,18183)}
+SCOPES={'Platform':(18190,18193),'Fault':(18190,18182,18193),'All':(18190,18181,18182,18193)}
 
 def resource_checks(os_type,docker_memory,available_memory,disk_free,python_version):
     return [{'name':name,'ok':ok,'message':message} for name,ok,message in [
@@ -33,7 +33,7 @@ def platform_owned():
         row=json.loads(output)
         if Path(row['ExecutablePath']).resolve()!= (ROOT/'.venv/Scripts/python.exe').resolve() or 'opslens.api:app' not in row['CommandLine']:return False
         import httpx
-        h=httpx.get('http://127.0.0.1:18180/api/v1/health',trust_env=False,timeout=2).json()
+        h=httpx.get('http://127.0.0.1:18190/api/v1/health',trust_env=False,timeout=2).json()
         return h.get('status')=='ok' and h.get('delivery') in ('1.1','1.2','1.3','2.1','2.2','2.3','3.1','3.2','3.3')
     except (OSError,ValueError,KeyError,TypeError,subprocess.SubprocessError):return False
     except Exception:return False
@@ -44,7 +44,7 @@ def open_port(port):
 def check_ports(scope,owned,is_open=open_port,workbench_owned=False):
     if scope not in SCOPES:raise ValueError('未知启动范围')
     for port in SCOPES[scope]:
-        if is_open(port) and port not in owned and not(port==18180 and workbench_owned):
+        if is_open(port) and port not in owned and not(port==18190 and workbench_owned):
             raise RuntimeError(f'端口{port}被其他服务占用；请先自行处理冲突，本脚本不会关闭它。')
 
 def inspect_environment(scope='Platform'):

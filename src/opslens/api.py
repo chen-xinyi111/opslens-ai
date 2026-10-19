@@ -1,6 +1,5 @@
 import asyncio
 import json
-import os
 from contextlib import asynccontextmanager, suppress
 from pathlib import Path
 from uuid import UUID, uuid4
@@ -26,9 +25,6 @@ from opslens.external import router as external_router, initialize as initialize
 from opslens.diagnostic.api import router as diagnostic_router
 from opslens.diagnostic.store import initialize as initialize_diagnostic
 from opslens.diagnostic.worker import worker as diagnostic_worker
-from opslens.caseflow.api import router as caseflow_router
-from opslens.caseflow.store import initialize as initialize_caseflow
-from opslens.caseflow.agent import worker as caseflow_worker
 
 
 @asynccontextmanager
@@ -36,20 +32,30 @@ async def lifespan(app):
     db.initialize()
     initialize_external()
     initialize_diagnostic()
-    initialize_caseflow()
-    tasks=[asyncio.create_task(caseflow_worker())]
-    # The workbench must not resume unrelated old diagnostic or recovery jobs.
-    if os.environ.get('OPSLENS_ENABLE_LEGACY_WORKERS')=='1':
-        tasks.extend(asyncio.create_task(fn()) for fn in (diagnostic_worker,worker,knowledge_worker,investigation_worker,recovery_worker))
-    try:yield
-    finally:
-        for task in tasks:task.cancel()
-        for task in tasks:
-            with suppress(asyncio.CancelledError):await task
+    diagnostic_task=asyncio.create_task(diagnostic_worker())
+    worker_task = asyncio.create_task(worker())
+    knowledge_task = asyncio.create_task(knowledge_worker())
+    investigation_task = asyncio.create_task(investigation_worker())
+    recovery_task=asyncio.create_task(recovery_worker())
+    yield
+    worker_task.cancel()
+    knowledge_task.cancel()
+    investigation_task.cancel()
+    recovery_task.cancel()
+    diagnostic_task.cancel()
+    with suppress(asyncio.CancelledError):
+        await worker_task
+    with suppress(asyncio.CancelledError):
+        await knowledge_task
+    with suppress(asyncio.CancelledError):
+        await investigation_task
+    with suppress(asyncio.CancelledError):
+        await recovery_task
+    with suppress(asyncio.CancelledError):
+        await diagnostic_task
 
 
-app = FastAPI(title="CaseFlow", version="0.5.0", lifespan=lifespan)
-app.include_router(caseflow_router)
+app = FastAPI(title="OpsLens AI", version="0.5.0", lifespan=lifespan)
 app.include_router(knowledge_router)
 app.include_router(investigation_router)
 app.include_router(recovery_router)
@@ -65,7 +71,7 @@ async def local_origin(request, call_next):
     origin = request.headers.get("origin")
     if host not in ("127.0.0.1", "localhost", "testserver"):
         return JSONResponse(status_code=403, content={"detail": "仅接受本机访问"})
-    if origin and origin not in ("http://127.0.0.1:18180", "http://localhost:18180"):
+    if origin and origin not in ("http://127.0.0.1:18190", "http://localhost:18190"):
         return JSONResponse(status_code=403, content={"detail": "仅接受本机工作台同源请求"})
     return await call_next(request)
 

@@ -1,0 +1,21 @@
+{
+  "theme": "base",
+  "htmlLabels": false,
+  "fontFamily": "Microsoft YaHei, Arial, sans-serif",
+  "themeVariables": {
+    "fontFamily": "Microsoft YaHei, Arial, sans-serif",
+    "fontSize": "16px",
+    "primaryColor": "#eaf3fb",
+    "primaryTextColor": "#17324d",
+    "primaryBorderColor": "#6a91b5",
+    "lineColor": "#52687c"
+  },
+  "flowchart": {
+    "htmlLabels": false,
+    "wrappingWidth": 240,
+    "curve": "linear",
+    "nodeSpacing": 28,
+    "rankSpacing": 32,
+    "padding": 20
+  }
+}

@@ -9,7 +9,7 @@ from opslens.config import secrets
 from opslens import db
 
 pytestmark = pytest.mark.integration
-BASE = "http://127.0.0.1:18180"
+BASE = "http://127.0.0.1:18190"
 
 
 @pytest.fixture(scope="module")

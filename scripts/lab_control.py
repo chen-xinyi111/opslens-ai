@@ -75,11 +75,11 @@ def override_worker(environment):
 
 
 def evidence_case(case_id, job_id):
-    response = client.post("http://127.0.0.1:18180/api/v1/collections",json={"lab":"fault"})
+    response = client.post("http://127.0.0.1:18190/api/v1/collections",json={"lab":"fault"})
     response.raise_for_status()
     collection_id = response.json()["id"]
     def check():
-        result = client.get("http://127.0.0.1:18180/api/v1/collections/"+collection_id)
+        result = client.get("http://127.0.0.1:18190/api/v1/collections/"+collection_id)
         result.raise_for_status()
         value = result.json()
         return value if value["status"] in ("completed","partial","failed") else None

@@ -50,7 +50,7 @@ def local_review(client, selected, manifest, job_id=None):
     print('Local review passed: fixed demo jobs, nine source-verified manuals; preview '+name,flush=True)
 
 def run(mode='worker'):
-    with httpx.Client(base_url='http://127.0.0.1:18180',trust_env=False,timeout=20) as c:
+    with httpx.Client(base_url='http://127.0.0.1:18190',trust_env=False,timeout=20) as c:
         ready=c.get('/api/v1/investigations/status');ready.raise_for_status()
         if not ready.json()['available']:raise RuntimeError(ready.json()['reason'])
         docs=c.get('/api/v1/kb/documents').json();indexes=c.get('/api/v1/kb/indexes').json()

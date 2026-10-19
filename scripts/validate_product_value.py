@@ -13,7 +13,7 @@ from opslens import db
 from opslens.diagnostic import intake
 from opslens.rag.provider import QuotaGuard
 
-API='http://127.0.0.1:18180/api/v1'
+API='http://127.0.0.1:18190/api/v1'
 
 def original_fingerprints():
     result={}

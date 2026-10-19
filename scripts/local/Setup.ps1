@@ -29,7 +29,7 @@ HEALTHY_DB_PASSWORD=$taskHealthySecret
 FAULT_DB_PASSWORD=$taskFaultSecret
 HEALTHY_DIAGNOSTIC_KEY=$taskHealthyKey
 FAULT_DIAGNOSTIC_KEY=$taskFaultKey
-PLATFORM_DATABASE_URL=postgresql://opslens:$taskPlatformSecret@127.0.0.1:18183/opslens
+PLATFORM_DATABASE_URL=postgresql://opslens:$taskPlatformSecret@127.0.0.1:18193/opslens
 "@
     [IO.File]::WriteAllText($taskConfig, $taskText, [Text.UTF8Encoding]::new($false))
 }
@@ -42,4 +42,4 @@ foreach ($taskLab in @('healthy','fault')) {
     $taskLabPath = Join-Path $RuntimeRoot "$taskLab.env"
     if (!(Test-Path -LiteralPath $taskLabPath)) { [IO.File]::WriteAllText($taskLabPath, $taskText, [Text.UTF8Encoding]::new($false)) }
 }
-Write-Output 'CaseFlow configuration ready; secrets remain local.'
+Write-Output 'OpsLens configuration ready; secrets remain local.'

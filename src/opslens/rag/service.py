@@ -33,7 +33,7 @@ def vectors(texts, kind="document", provider=None):
     return [output[key] for key in keys]
 
 
-def build_index(index_id, provider=None, activate=True):
+def build_index(index_id, provider=None):
     with db.connect() as conn:
         index=conn.execute("SELECT * FROM kb_indexes WHERE id=%s",(index_id,)).fetchone()
         if not index or index["status"] not in ("building","ready"):
@@ -45,9 +45,9 @@ def build_index(index_id, provider=None, activate=True):
         conn.execute("SELECT pg_advisory_xact_lock(hashtextextended(%s,1203))",(index["mode"],))
         # An earlier, slower build cannot displace a newer completed index.
         newer=conn.execute("SELECT 1 FROM kb_indexes WHERE mode=%s AND status='ready' AND created_at>%s LIMIT 1",(index["mode"],index["created_at"])).fetchone()
-        if activate and not newer:
+        if not newer:
             conn.execute("UPDATE kb_indexes SET active=false WHERE mode=%s",(index["mode"],))
-        conn.execute("UPDATE kb_indexes SET status='ready',active=%s,finished_at=now() WHERE id=%s",(activate and not bool(newer),index_id))
+        conn.execute("UPDATE kb_indexes SET status='ready',active=%s,finished_at=now() WHERE id=%s",(not bool(newer),index_id))
     return {"index_id":str(index_id),"mode":index["mode"],"chunks":len(rows),"embedding_model":index["embedding_model"],"dimensions":index["dimensions"]}
 
 

@@ -11,11 +11,6 @@ from opslens.api import app,lifespan
 from opslens.config import platform_dsn,ROOT
 
 def test_empty_database_bootstrap_needs_only_packaged_sources(monkeypatch,tmp_path):
-    from opslens import api
-    legacy_runs=[]
-    async def unrelated_worker():legacy_runs.append(True)
-    monkeypatch.delenv('OPSLENS_ENABLE_LEGACY_WORKERS',raising=False)
-    for name in ('diagnostic_worker','worker','knowledge_worker','investigation_worker','recovery_worker'):monkeypatch.setattr(api,name,unrelated_worker)
     schema='product_clean_'+uuid4().hex
     with db.connect() as c:c.execute(psycopg.sql.SQL('CREATE SCHEMA {}').format(psycopg.sql.Identifier(schema)))
     def connect():return psycopg.connect(platform_dsn(),row_factory=dict_row,options=f'-c search_path={schema},public')
@@ -41,6 +36,5 @@ def test_empty_database_bootstrap_needs_only_packaged_sources(monkeypatch,tmp_pa
             status=c.get('/api/v1/diagnostic/settings').json()
             assert status['settings']['enabled'] is False and status['available'] is False
             assert status['used_today']==0 and c.get('/api/v1/diagnostic/sessions').json()==[]
-            assert not legacy_runs
     finally:
         with connect() as conn:conn.execute(psycopg.sql.SQL('DROP SCHEMA {} CASCADE').format(psycopg.sql.Identifier(schema)))

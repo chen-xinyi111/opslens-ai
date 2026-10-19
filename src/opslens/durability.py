@@ -18,7 +18,6 @@ INTERNAL = contextvars.ContextVar('opslens_runtime_internal', default=False)
 CURRENT_OPERATION = contextvars.ContextVar('opslens_current_operation',default=None)
 CURRENT_STAGE = contextvars.ContextVar('opslens_current_stage',default=None)
 FAMILIES = {
- 'caseflow': ('cf_tasks','cf_events','task_id','queued','running',600),
  'diagnostic': ('diagnostic_turns','diagnostic_events','turn_id','queued','running',240),
  'collection': ('collections','collection_events','collection_id','queued','running',240),
  'knowledge': ('kb_tasks','kb_events','task_id','queued','running',600),

@@ -16,7 +16,7 @@ ROOT=Path(__file__).resolve().parents[1]
 sys.path.insert(0,str(ROOT/'src'))
 
 def run(mode='conflict'):
-    with httpx.Client(base_url='http://127.0.0.1:18180',trust_env=False,timeout=20) as c:
+    with httpx.Client(base_url='http://127.0.0.1:18190',trust_env=False,timeout=20) as c:
         ready=c.get('/api/v1/investigations/status');ready.raise_for_status()
         assert ready.json()['available'],ready.json()['reason']
         index=next(i for i in c.get('/api/v1/kb/indexes').json() if i['active'] and i['mode']=='semantic' and i['status']=='ready')

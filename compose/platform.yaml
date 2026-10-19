@@ -5,8 +5,8 @@ services:
       POSTGRES_USER: opslens
       POSTGRES_PASSWORD: ${PLATFORM_DB_PASSWORD:?Run Setup.ps1}
       POSTGRES_DB: opslens
-    ports: ["127.0.0.1:18183:5432"]
-    volumes: [platform-data:/var/lib/postgresql/data]
+    ports: ["127.0.0.1:18193:5432"]
+    volumes: [original-data:/var/lib/postgresql/data]
     labels: {io.opslens.scope: platform}
     healthcheck:
       test: [CMD-SHELL, "pg_isready -U opslens -d opslens"]
@@ -14,4 +14,4 @@ services:
       timeout: 3s
       retries: 30
 volumes:
-  platform-data:
+  original-data:

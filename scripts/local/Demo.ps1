@@ -1,14 +1,13 @@
 param([switch]$SelfCheck)
 . "$PSScriptRoot/Common.ps1"
-& "$PSScriptRoot/Start.ps1" -Scope Platform
-$taskBase='http://127.0.0.1:18180/api/v1/caseflow'
-$taskProjects=Invoke-RestMethod "$taskBase/projects"
-$taskExamples=@{reservation='会议室预约 · 示例';permission='文件共享 · 示例';registration='活动报名 · 示例'}
-foreach($taskKind in $taskExamples.Keys){
-    if(!($taskProjects | Where-Object name -eq $taskExamples[$taskKind])){
-        $taskExample=Invoke-RestMethod -Method Post "$taskBase/examples/$taskKind"
-        if($SelfCheck -and (!$taskExample.state.requirements.Count -or !$taskExample.state.cases.Count)){throw '示例资料不完整'}
-    }
-}
-Write-Output 'CaseFlow 示例已就绪：http://127.0.0.1:18180/'
-Write-Output '示例是人工编写的体验资料；准备示例不会调用模型，也不会填写测试通过结果。'
+Import-LocalSettings
+& "$PSScriptRoot/Check.ps1" -Scope Fault
+# Pause only the platform; no background generation may claim our controlled tasks.
+& "$PSScriptRoot/RestartPlatform.ps1" -StopOnly
+try {
+    $taskDemoArgs = @((Join-Path $ProjectRoot 'scripts/prepare_demo.py'))
+    if ($SelfCheck) { $taskDemoArgs += '--selfcheck' }
+    & $PythonExe @taskDemoArgs
+    Assert-Native '真实演示准备'
+} finally { & "$PSScriptRoot/RestartPlatform.ps1" -SkipBuild }
+Write-Output '打开工作台 → 开始使用。准备演示只改变故障实例；恢复仍须页面批准。'

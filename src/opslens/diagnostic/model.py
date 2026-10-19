@@ -18,7 +18,7 @@ def validate_settings(value):
     if url.username or url.password or url.query or url.fragment or not url.hostname:raise ValueError('接口地址不能包含凭据、查询参数或片段')
     if value.mode=='free':
         if value.key_env!='DASHSCOPE_APIKEY' or value.base_url.rstrip('/')!=api_base():raise ValueError('免费模式使用已核验的百炼北京端点和DASHSCOPE_APIKEY')
-        if value.model not in ('qwen3.8-max','qwen3.8-max-0902','deepseek-v4.1-flash'):raise ValueError('免费模式模型不在既有范围内')
+        if value.model not in ('qwen3.8-max','deepseek-v4.1-flash'):raise ValueError('免费模式模型不在既有范围内')
     elif url.scheme!='https' and not(url.scheme=='http' and url.hostname in ('localhost','127.0.0.1','::1')):
         raise ValueError('兼容接口需要HTTPS；仅本机模型允许HTTP')
     if value.mode=='compatible' and not url.path.rstrip('/').endswith('/v1'):raise ValueError('兼容接口填写以/v1结尾的基础地址')
@@ -51,7 +51,7 @@ def guard_messages(messages,secrets):
 
 def readiness(cfg):
     value=validate_settings(ModelSettings(**cfg['settings']))
-    if not value.enabled:raise ModelBlocked('模型尚未启用；仍可整理和查看本机资料')
+    if not value.enabled:raise ModelBlocked('新排查模型尚未启用；仍可整理和查看本机资料')
     if not key(cfg):raise ModelBlocked('未配置服务端环境变量 '+value.key_env)
     if value.mode=='free':QuotaGuard(key=key(cfg),endpoint=value.base_url).check(value.model)
     with db.connect() as c:
@@ -60,7 +60,7 @@ def readiness(cfg):
 
 def settings_status():
     with db.connect() as c:row=config(c);count=used(c)
-    try:readiness(row);available=True;reason='模型配置可用；开始处理后才发送选中资料'
+    try:readiness(row);available=True;reason='模型配置可用；开始分析后才发送选中资料'
     except (ValueError,ModelBlocked) as exc:available=False;reason=str(exc)
     return row|{'available':available,'reason':reason,'used_today':count}
 

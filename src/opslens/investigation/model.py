@@ -3,9 +3,9 @@ from concurrent.futures import ThreadPoolExecutor
 from opslens.rag.provider import DashScopeProvider,ModelFailure,model_http_client
 MODEL="qwen3.8-max"
 class GenerationProvider(DashScopeProvider):
-    def __init__(self,*args,model=MODEL,max_output=1800,**kwargs):
-        if model not in (MODEL,'qwen3.8-max-0902','deepseek-v4.1-flash'):raise ValueError('生成模型不在已授权范围')
-        super().__init__(*args,**kwargs);self.name=model;self.max_output=min(2048,max_output)
+    def __init__(self,*args,model=MODEL,**kwargs):
+        if model not in (MODEL,'deepseek-v4.1-flash'):raise ValueError('生成模型不在已授权范围')
+        super().__init__(*args,**kwargs);self.name=model
     def prepare_parallel(self):
         # Check quota first; establish two verified connections without credentials or data.
         self.guard.check(self.name)
@@ -24,18 +24,18 @@ class GenerationProvider(DashScopeProvider):
         if not isinstance(data,dict):return data
         return {**data,"output":{"choices":data.get("choices",[])},"request_id":data.get("id")}
     def generate(self,messages,tools):
-        payload={"model":self.name,"messages":messages,"temperature":0.1,"max_tokens":self.max_output,"enable_thinking":False,"preserve_thinking":False,"enable_search":False,"tools":tools}
+        payload={"model":self.name,"messages":messages,"temperature":0.1,"max_tokens":1800,"enable_thinking":False,"preserve_thinking":False,"enable_search":False,"tools":tools}
         if self.name=='deepseek-v4.1-flash':payload.pop('preserve_thinking')
         size=len(json.dumps(payload,ensure_ascii=False).encode())
         if size>90000:raise ModelFailure("调查上下文超出保守长度上限")
-        data=self._call(self.name,"/services/aigc/text-generation/generation",payload,size+self.max_output)
+        data=self._call(self.name,"/services/aigc/text-generation/generation",payload,size+1800)
         try:
             choice=data["output"]["choices"][0]
-            if choice.get("finish_reason")=="length":raise ModelFailure("模型输出被截断，请减少所选需求后分批生成；已有资料和用例仍保留")
+            if choice.get("finish_reason")=="length":raise ValueError()
             message=choice["message"]
             if message.get("role")!="assistant" or not isinstance(message.get("content",""),str):raise ValueError()
             calls=message.get("tool_calls",[])
             if not isinstance(calls,list) or len(calls)>12:raise ValueError()
             return {**message,"provider_request_id":data.get("request_id"),"usage":data.get("usage",{})}
         except (ValueError,KeyError,IndexError,TypeError):
-            raise ModelFailure("模型响应格式不合法，草稿未保存，请检查处理记录") from None
+            raise ModelFailure("调查模型响应格式不合法或输出截断") from None

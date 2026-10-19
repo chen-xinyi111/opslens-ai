@@ -1,0 +1,35 @@
+# OpsLens AI 项目流程
+
+外部项目只读调查与隔离实验恢复分别标注；核验分支对应独立核验模式。
+
+```mermaid
+%%{init: {"theme":"base","htmlLabels":false,"fontFamily":"Microsoft YaHei, Arial, sans-serif","themeVariables":{"fontFamily":"Microsoft YaHei, Arial, sans-serif","fontSize":"16px","primaryColor":"#eaf3fb","primaryTextColor":"#17324d","primaryBorderColor":"#6a91b5","lineColor":"#52687c"},"flowchart":{"htmlLabels":false,"wrappingWidth":240,"curve":"linear","nodeSpacing":28,"rankSpacing":32,"padding":20}}}%%
+flowchart TB
+    Select["选择项目 · 描述问题"] --> Collect["本机采集状态与限定日志<br/>脱敏 · 保存快照"]
+    Collect --> Preview["预览原文 · 选择资料<br/>确认发送至模型服务"]
+    Preview --> Investigate["知识检索与 Agent 调查<br/>运行依据 + 项目资料"]
+    Investigate --> Verify{"独立核验<br/>依据是否充分？"}
+    Verify -->|充分| Report["报告：结论 · 引用 · 建议"]
+    Verify -->|不足 · 外部项目| NewEvidence["说明缺少资料<br/>重新采集、预览并确认"]
+    NewEvidence --> Collect
+    Verify -->|不足 · 隔离实验| Recheck["有界补查<br/>达到限制时停止并说明"]
+    Recheck -->|取得补充证据| Verify
+    Report -->|外部项目| Manual["依据建议人工处理"]
+    Report -->|隔离实验 · 有适用动作| Plan["固定恢复方案 · 人工批准<br/>绑定版本、摘要与有效期"]
+    Plan --> Check{"执行前复核<br/>状态与批准仍有效？"}
+    Check -->|是| Action["执行白名单动作<br/>用新业务任务验证"]
+    Check -->|否| Stop["停止执行 · 重新核对"]
+    Action --> Result["保存结果与动作记录<br/>结果未知时转人工核对"]
+    classDef input fill:#eaf3fb,stroke:#6a91b5,color:#17324d;
+    classDef output fill:#e8f4ef,stroke:#5d9784,color:#173f35;
+    classDef decision fill:#fff6e7,stroke:#bc9755,color:#614721;
+    class Select,Collect,Preview,Investigate,Recheck,Plan,Action input;
+    class Report,Manual,NewEvidence,Result,Stop output;
+    class Verify,Check decision;
+```
+
+使用 Mermaid CLI 12 重新生成：
+
+```powershell
+npx -y @mermaid-js/mermaid-cli@12.0.0 -i figures/opslens-workflow.mmd -c figures/mermaid-config.json -o figures/opslens-workflow.png --size 1300 -s 2
+```

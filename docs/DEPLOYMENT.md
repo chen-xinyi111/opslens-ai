@@ -1,55 +1,66 @@
-# CaseFlow 部署与模型配置
+# 本机部署与故障排查
 
-## 本机运行
+支持Windows、PowerShell 7、Docker Desktop Linux容器、Python 3.12–3.14、Node.js 24、pnpm 11。当前机器使用Python 3.14、Node 24.19.0、pnpm 11.25.0；脚本也能识别Codex附带运行时，不需要另装一套。依赖使用requirements.lock和frontend/pnpm-lock.yaml，启动不升级依赖。
 
-需要Windows、PowerShell 7、Docker Desktop Linux容器、Python 3.12–3.14、Node.js 24及pnpm 11，依赖使用锁文件。
+## 第一次使用
+
+在opslens-ai目录打开PowerShell 7，运行：
 
 ```powershell
 ./scripts/local/Setup.ps1
 ./scripts/local/Start.ps1
+```
+
+Setup安装依赖并生成本机随机配置。已有.env与实验配置保留；不显示密码。首次依赖/镜像下载需要网络，Docker Desktop需已启动。Start默认仅启动平台与平台数据库，打开http://127.0.0.1:18190/。自动导入九份实验手册及关键词索引，不调用任何模型；青禾资料随源码提供并独立初始化。
+
+首次实验环境语义调查还需要百炼北京密钥（系统用户环境变量DASHSCOPE_APIKEY）、经过账户页面核验的逐模型免费额度记录及语义索引；缺失时停止，不会付费降级。语义索引构建会调用向量模型，必须先确认免费额度与资料发送授权。本机已有语义索引可复用，演示不需要模型调用。克隆源码不会获得本机语义索引、数据库、配额记录或演示结果，不宣称零配置复现真实模型效果。
+
+## 重启与范围
+
+```powershell
+./scripts/local/Check.ps1 -Scope Platform       # 只读预检
+./scripts/local/Start.ps1 -Scope Platform       # 升级/启动平台，保留实验状态
+./scripts/local/RestartPlatform.ps1            # 构建页面，只重启平台
+./scripts/local/Start.ps1 -Scope Platform -SkipBuild  # 使用已构建页面
 ./scripts/local/Status.ps1
+./scripts/local/Stop.ps1 -Scope Platform        # 只停止平台和平台数据库
 ```
 
-打开 http://127.0.0.1:18180/ 。数据库绑定127.0.0.1:18183；默认仅启动平台，不需要其他业务项目。应用仅接受本机和同源请求。
+默认Scope Platform不改任何实验或接入项目服务；显式Scope Fault包括平台、故障实例，Scope All才包括正常实例。完整Start会启动所选实验服务，适合首次启动；准备故障后保留默认Platform范围，不显式启动Fault/All。准备好故障后仅重启平台。Stop使用同样范围且保留数据卷；不提供一键清库或删卷。
 
-## 模型配置
+## 资源与端口
 
-服务端.env或进程环境中配置密钥，页面设置只填写变量名，不接收密钥本身。明确启用模型后才允许处理授权资料。
+预检要求Docker Linux引擎、Docker总内存≥2GiB、本机可用内存≥2GiB、项目磁盘空闲≥4GiB；建议Docker至少4GiB，长时间评测留更多内存/空间。它是最低启动门槛，不是并发容量或性能承诺。Docker镜像存储可能位于其他磁盘，下载时也需要相应空间。
 
-百炼免费模式检查账户指纹、北京端点、逐模型免费额度和用完即停，核验超过24小时即阻断；不得直接更改时间绕过核验。生成、Embedding和重排分别核验。
+18190平台HTTP、18182故障API、18193平台数据库，仅绑定127.0.0.1；正常API18181仅Scope All启动。资源不足、Docker未启动、外来端口占用则停止，不会杀已有服务。运行中平台需PID/进程与health共同核对，不能只凭版本认领端口。
 
-先登录百炼北京地域的“费用用量→免费额度”，逐模型确认剩余Token、到期日和“用完即停”已开启，将截图留在本机.runtime内。在.env填写DASHSCOPE_APIKEY，重启平台。按实际观察值登记，以下数值为命令占位，不能直接当成账户额度：
+## 常见提示
 
-```powershell
-. ./scripts/local/Common.ps1
-Import-LocalSettings
-./.venv/Scripts/python.exe scripts/record_free_quota.py --model qwen3.8-max-0902 --remaining <向下取整的剩余Token> --expires <控制台到期日> --evidence .runtime/quota.png --confirmed-free-only
-```
+| 提示 | 处理 |
+|---|---|
+| Docker无法访问或不是Linux | 打开Docker Desktop，等待引擎就绪，检查Linux容器模式 |
+| Python/Node/pnpm缺失 | 按上述版本安装或使用当前Codex附带路径；先运行Setup |
+| 固定端口被其他服务占用 | 手动确认占用程序，选择是否停止；脚本不会替你杀进程 |
+| PID属于其他进程 | 保留该进程；核对.runtime/platform.pid是否过期，不自行修改PID强杀 |
+| 前端依赖下载连接失败 | 网络恢复后重新运行Setup；已安装的依赖可继续构建 |
+| 数据库不可用/工作台未就绪 | 运行Status，查看.runtime/platform-logs.json指向的本次stderr日志；不要贴密钥或整个.env |
+| 模型额度待核验/已失效 | 到百炼北京免费额度页核对各模型剩余、到期、用完即停，再更新本机核验记录；不自动续费 |
+| 方案超过十分钟/状态变化 | 重新查看当前状态并生成方案，再审阅批准；旧动作不会重发 |
+| 演示还有未完成任务 | 等任务终结后再准备，原记录不会被强制清理 |
 
-登记工具不访问控制台，也不替你开启用完即停；没有真实核验时禁止运行。需要语义检索时，还须分别登记text-embedding-v4与gte-rerank-v2。保留原模型名称，切换其他型号须由使用者明确选择，平台不自动换模型。
+平台按启动时间保存的stdout、stderr、数据库卷、模型请求响应及配额截图只留本机忽略目录。已提供Backup.ps1私有一致性备份及独立数据库还原验证，见ARCHIVE.md。没有远程、多租户或公网部署能力。不要手动删除未知调用记录。外部项目采集无需模型密钥或语义索引；AI调查另需密钥、有效额度和针对快照的发送确认。
 
-兼容服务填写以/v1结尾的HTTPS基础地址，本机模型允许HTTP；模型须支持工具调用。兼容模式可能产生费用，由用户明确选择，平台不自动切换。语义检索与重排目前使用百炼，无法配置时选择关键词策略。
 
-默认每日20次请求、单次最多2048输出Token，更正和工具中的外部模型请求也计数。次数不是金额上限；响应未知时保留登记，不自动重试。
+## 0.5 模型配置与升级
 
-## 停止与备份
+升级现有实例前运行 `Backup.ps1 -VerifyRestore`，没有活动任务时才暂停平台、导出和独立还原；旧数据不清除。新八表在平台启动时增量初始化，默认模型关闭，旧接口保留。
 
-```powershell
-./scripts/local/Stop.ps1
-./scripts/local/Backup.ps1 -VerifyRestore
-```
+全新安装的日志扫描、引用原文、记录与导出只需平台数据库，不依赖当前机器的私有额度文件、旧语义索引、演示记录或青禾目录。AI分析另需配置模型和密钥，缺失时不会发送资料。
 
-停止保留数据库卷。备份、完整模型请求与账户配置留本机，密钥单独保管。
+兼容模型基础地址填写 `https://服务商/v1`，本机模型可使用 `http://127.0.0.1:端口/v1`；填写具体模型名及服务端密钥环境变量名，例如 `OPSLENS_MODEL_KEY`。将变量配置到服务端进程环境或本机忽略的 `.env`，重启平台后在设置明确启用。不要在URL、模型名、浏览器、报告或源码中填写密钥。百炼免费模式仍使用DASHSCOPE_APIKEY及原免费额度保护。
 
-## 开发检查
+默认每日20次请求（北京时间），可显式调整至1–200；输出上限256–2048。未知调用也占请求名额，更正计数，预算耗尽停止。这些上限不表示精确费用或余额保护；兼容模式不会自动选择付费模型。
 
-```powershell
-./.venv/Scripts/python.exe -m pytest --ignore=tests/test_integration.py --basetemp=.runtime/pytest-local
-./.venv/Scripts/python.exe scripts/export_openapi.py
-cd frontend
-pnpm run types
-pnpm test
-pnpm run build
-```
+官方文档白名单在设置维护，完整小写域名，无通配符。10秒HTTP超时、1MiB正文上限、公网地址和每跳域名校验。抓取失败保留本机日志能力。
 
-启动日志位置由.runtime/platform-logs.json记录，分享前需脱敏。
+新排查链路不需要语义索引或业务任务工具。仅依赖原持久队列/数据库，不新增消息中间件或Agent服务。安装检查验证了空数据库初始化与缺密钥行为，未在第二台全新机器下载所有运行时与镜像，不把当前机器升级验证冒充完整全新部署实测。

@@ -1,7 +1,7 @@
 [project]
-name = "caseflow-workbench"
+name = "opslens-ai"
 version = "0.5.0"
-description = "Requirement and test case workbench with traceable review and change history"
+description = "Local backend troubleshooting assistant with traceable evidence"
 requires-python = ">=3.12,<3.15"
 
 [tool.pytest.ini_options]

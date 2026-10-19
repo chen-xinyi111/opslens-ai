@@ -19,7 +19,7 @@ from opslens.investigation.tools import Tools
 from opslens.config import secrets
 
 def run():
-    with httpx.Client(base_url='http://127.0.0.1:18180',trust_env=False,timeout=20) as c:
+    with httpx.Client(base_url='http://127.0.0.1:18190',trust_env=False,timeout=20) as c:
         indexes=c.get('/api/v1/kb/indexes').json()
         index=next(i for i in indexes if i['active'] and i['mode']=='semantic' and i['status']=='ready')
         selected=[d for d in c.get('/api/v1/kb/documents').json() if d['id'] in index['document_ids']]

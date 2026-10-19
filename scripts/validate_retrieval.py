@@ -21,7 +21,7 @@ def wait(client,task_id,timeout=120):
 def evaluate(modes):
     cases=json.loads((ROOT/"data/knowledge/development-queries.json").read_text(encoding="utf-8"))
     records=[]
-    with httpx.Client(base_url="http://127.0.0.1:18180",timeout=15,trust_env=False) as client:
+    with httpx.Client(base_url="http://127.0.0.1:18190",timeout=15,trust_env=False) as client:
         status=client.get("/api/v1/kb/status").json()
         semantic_id=None
         if any(mode!="keyword" for mode in modes):

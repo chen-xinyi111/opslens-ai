@@ -34,7 +34,7 @@ def probe(client,case,job_id=None,target="fault"):
     return {"case":case,"target":target,"task":value,"citation_checks":cited,"expected_match":match}
 def run(mode):
     records=json.loads(OUTPUT.read_text(encoding="utf-8")) if OUTPUT.exists() else []
-    with httpx.Client(base_url="http://127.0.0.1:18180",trust_env=False,timeout=25) as client:
+    with httpx.Client(base_url="http://127.0.0.1:18190",trust_env=False,timeout=25) as client:
         status=client.get("/api/v1/investigations/status").json()
         if not status["available"]:raise RuntimeError(status["reason"])
         # The baseline corpus must be the nine generated demo manuals only.

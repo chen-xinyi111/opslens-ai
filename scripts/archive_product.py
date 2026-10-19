@@ -36,7 +36,7 @@ def main():
         if c.execute("SELECT to_regclass('diagnostic_turns') AS t").fetchone()['t']:
             if c.execute("SELECT count(*) AS n FROM diagnostic_turns WHERE status IN ('queued','running')").fetchone()['n']:
                 raise RuntimeError('Wait for active troubleshooting before taking a backup')
-        for table in ['investigations', 'kb_tasks', 'collections', 'cf_tasks']:
+        for table in ['investigations', 'kb_tasks', 'collections']:
             if c.execute(sql.SQL("SELECT count(*) AS n FROM {} WHERE status IN ('queued','running')").format(sql.Identifier(table))).fetchone()['n']:
                 raise RuntimeError('Wait for active tasks before taking a release backup')
         if c.execute("SELECT count(*) AS n FROM recovery_plans WHERE status IN ('approved','executing','verifying')").fetchone()['n']:

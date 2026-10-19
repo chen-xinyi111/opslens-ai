@@ -1,0 +1,167 @@
+{
+  "version": "0.5.0",
+  "source": "isolated real faults plus generated heartbeat noise; selected non-random small samples",
+  "runs": [
+    {
+      "started_at": "2026-10-14T03:19:22.160602+00:00",
+      "source_revision": "3dbb87eb400f7e29d3344015a3acf5283ddb6646",
+      "completed_reports": 0,
+      "fact_quote_matches": 0,
+      "request_reservations": 1,
+      "rounds": [
+        {
+          "case": "dependency_wrong_port",
+          "round": 1,
+          "status": "failed",
+          "elapsed_seconds": 11.59,
+          "fact_quote_matches": 0,
+          "model_calls": null,
+          "error": "模型超时或响应异常；已保留调用记录，不自动重试"
+        }
+      ]
+    },
+    {
+      "started_at": "2026-10-14T03:22:56.277729+00:00",
+      "source_revision": "3dbb87eb400f7e29d3344015a3acf5283ddb6646",
+      "completed_reports": 7,
+      "fact_quote_matches": 16,
+      "request_reservations": 7,
+      "rounds": [
+        {
+          "case": "api_500_configuration",
+          "round": 1,
+          "status": "completed",
+          "elapsed_seconds": 19.88,
+          "fact_quote_matches": 3,
+          "model_calls": 1,
+          "error": null
+        },
+        {
+          "case": "api_500_configuration",
+          "round": 2,
+          "status": "completed",
+          "elapsed_seconds": 17.8,
+          "fact_quote_matches": 2,
+          "model_calls": 1,
+          "error": null
+        },
+        {
+          "case": "startup_port_conflict",
+          "round": 1,
+          "status": "completed",
+          "elapsed_seconds": 19.92,
+          "fact_quote_matches": 2,
+          "model_calls": 1,
+          "error": null
+        },
+        {
+          "case": "startup_port_conflict",
+          "round": 2,
+          "status": "completed",
+          "elapsed_seconds": 18.98,
+          "fact_quote_matches": 4,
+          "model_calls": 1,
+          "error": null
+        },
+        {
+          "case": "startup_invalid_port",
+          "round": 1,
+          "status": "completed",
+          "elapsed_seconds": 14.62,
+          "fact_quote_matches": 2,
+          "model_calls": 1,
+          "error": null
+        },
+        {
+          "case": "startup_invalid_port",
+          "round": 2,
+          "status": "completed",
+          "elapsed_seconds": 16.8,
+          "fact_quote_matches": 2,
+          "model_calls": 1,
+          "error": null
+        },
+        {
+          "case": "insufficient_500",
+          "round": 1,
+          "status": "completed",
+          "elapsed_seconds": 12.61,
+          "fact_quote_matches": 1,
+          "model_calls": 1,
+          "error": null
+        }
+      ]
+    },
+    {
+      "started_at": "2026-10-14T11:45:17.096535+00:00",
+      "source_revision": "d401a6e524ceacddd306e85e7e2699891a7ec4e1",
+      "completed_reports": 0,
+      "fact_quote_matches": 0,
+      "request_reservations": 2,
+      "rounds": [
+        {
+          "case": "api_500_configuration",
+          "round": 1,
+          "status": "blocked",
+          "elapsed_seconds": 32.11,
+          "fact_quote_matches": 0,
+          "model_calls": null,
+          "error": "模型输出未通过校验，一次更正后仍无效"
+        }
+      ]
+    },
+    {
+      "started_at": "2026-10-14T11:51:12.657476+00:00",
+      "source_revision": "3c0fa39a18909d84b712f1d87f2a2599a07d6eed",
+      "completed_reports": 2,
+      "fact_quote_matches": 5,
+      "request_reservations": 2,
+      "rounds": [
+        {
+          "case": "startup_port_conflict",
+          "round": 1,
+          "status": "completed",
+          "elapsed_seconds": 21.81,
+          "fact_quote_matches": 3,
+          "model_calls": 1,
+          "error": null
+        },
+        {
+          "case": "startup_invalid_port",
+          "round": 1,
+          "status": "completed",
+          "elapsed_seconds": 15.73,
+          "fact_quote_matches": 2,
+          "model_calls": 1,
+          "error": null
+        }
+      ]
+    }
+  ],
+  "limitations": [
+    "Exact quote match is not semantic correctness.",
+    "No production/user study or human/direct-chat timing control.",
+    "Initial failed rounds and unknown usage retained.",
+    "New follow-up trials remain pending because the conservative free budget is insufficient.",
+    "Some facts infer service state from generated heartbeat noise; one new report overstates root-cause certainty."
+  ],
+  "totals": {
+    "completed_reports": 9,
+    "fact_quote_matches": 21,
+    "request_reservations": 12,
+    "failed_rounds": 2,
+    "known_total_tokens": 17374,
+    "unknown_usage_requests": 1,
+    "completed_wait_median_seconds": 17.8
+  },
+  "new_trial": {
+    "completed_reports": 2,
+    "fact_quote_matches": 5,
+    "blocked_rounds": 1,
+    "requests": 4,
+    "known_tokens": 7418,
+    "unique_source_uuid_citations_resolved": 0,
+    "original_failure_not_regraded": true,
+    "followup_model_calls": 0
+  }
+}
